@@ -1,30 +1,37 @@
-# AZURE-web
-High Availability Website Deployment on Azure
-In this project, I set up a highly available website on Microsoft Azure to make sure it stays online and runs smoothly even if there are issues in one of the regions. The goal was to ensure the website could handle traffic from users in different locations and stay available no matter what.
+# High Availability Website Deployment on Azure
+Overview
+This project demonstrates the deployment of a high-availability website across multiple Azure regions, ensuring optimal traffic distribution, scalability, and fault tolerance using Azure Traffic Manager and Application Gateway.
 
-What I Did:
+Architecture
+Azure Virtual Machines (VMs):
 
-VM Setup in Two Regions: I deployed Azure Virtual Machines (VMs) in two different regions: Central US and West US. These VMs hosted different pages of the website:
+Deployed 4 VMs: 2 in Central US and 2 in West US.
+VMs in each region are distributed across two subnets.
+Storage Account:
 
-Home Page: Hosted on VM2.
-Upload Page: Hosted on VM1, where users can upload files to Azure Blob Storage.
-Error Page: A custom error page (for 403 and 502 errors) was hosted in Azure Blob Storage.
-Application Gateway Configuration: I used Azure Application Gateway to route users to the right page based on the URL:
+Created a storage account with two containers:
+static: Hosts the static website error page (error.html).
+upload: Contains the upload page (upload.html) but without enabling static website hosting.
+Application Gateway:
 
-When users visit example.com, they are sent to the home page on VM2.
-When users go to example.com/upload, they are directed to the upload page on VM1.
-If there's an error (like 403 or 502), the error page is shown from Azure Blob Storage.
-Traffic Distribution with Traffic Manager: To make sure users are always directed to the right region, I set up Azure Traffic Manager. It automatically balances the traffic between the Central US and West US regions, ensuring the website is always available, even if one region has issues.
+Configured separate application gateways for Central US and West US regions.
+Central US:
+Backend pool 1: Points to VM1 serving the upload page.
+Backend pool 2: Points to VM2 serving the home page.
+Routing rules include a custom error page and path-based routing for /upload.
+Similar configuration for West US application gateway.
+Traffic Manager:
 
-Secure Communication with VNet Peering: I used VNet-to-VNet Peering to securely connect the VMs and resources in both regions, so they could communicate with each other without any security risks.
+Configured a Traffic Manager profile to distribute traffic between Central US and West US application gateways based on their public IPs.
+Scripts and Code:
 
-Blob Storage for Error Pages and File Uploads: I used Azure Blob Storage to store the custom error page and a container called upload to store files that users upload.
-
-Technologies Used:
-
-Azure Virtual Machines (VMs): To host the website and its pages.
-Azure Application Gateway: To route traffic to the right VM and show error pages.
-Azure Traffic Manager: To balance traffic between regions for high availability.
-Azure Blob Storage: For storing the error page and uploaded files.
-Azure VNet Peering: To securely connect resources across regions.
-This project helped me learn how to build a reliable, scalable website on Azure that can handle traffic from users in different regions and stay online, even during issues in one region.
+Cloned a Git repository to each VM containing vm1.sh and vm2.sh scripts for setup.
+Configured config.py in VM1 of both regions to connect to the storage account's upload container.
+Ran the application using sudo python3 app.py.
+Key Technologies Used
+Azure Traffic Manager: For load balancing between regions.
+Azure Application Gateway: For routing traffic and implementing backend pools.
+Python: For handling uploads and serving pages.
+Git: For version control and deployment scripts.
+Outcome
+The website ensures high availability, with traffic managed efficiently between regions and seamless access to the upload and home pages. Custom error handling is also integrated for improved user experience.
